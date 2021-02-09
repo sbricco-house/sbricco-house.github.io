@@ -34,7 +34,7 @@ jobs:
       - name: Debug
         run: echo $GITHUB_REPOSITORY
       - name: Deploy official website
-        if: ${{ env.GITHUB_REPOSITORY == pslab-unibo/web-frontend }}
+        if: ${{ env.GITHUB_REPOSITORY == 'pslab-unibo/web-frontend' }}
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
