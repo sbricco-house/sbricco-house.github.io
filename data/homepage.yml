@@ -4,7 +4,7 @@ banner:
   image : "images/banner-art.svg"
   content : "UNIBO / DISI / Campus di Cesena"
   button:
-    enable : true
+    enable : false
     label : "Contact With Us"
     link : "contact"
 
