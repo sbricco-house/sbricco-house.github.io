@@ -10,7 +10,7 @@ Install Hugo, extended version. Most Linux distributions have it ready in defaul
   * **DO NOT** commit anything inside `public`. The folder is ignored and nothing should be stored there
   * **DO NOT** change anything inside `themes`. The theme maintenance is "outsourced"
   * Navigation and menus are configured inside `config.toml`
-  * The homepage is customized inside `data/homepage.yml`
+  * The homepage is customized inside `data/en/homepage.yml`
   * All the contents are (you don't say) inside `content`
   * **DO NOT** add HTML files
   * Try to avoid HTML snippets inside markdown files. Most of what you want to embed is dealt with Hugo's shortcodes. If there is no shortcode, we can develop one.
