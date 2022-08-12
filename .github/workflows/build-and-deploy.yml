@@ -1,52 +1,60 @@
-name: Build and deploy
+name: Deploy Hugo site to Pages
+
 on:
   push:
-    branches:
-      - master
+    branches: ["master"]
+  pull_request:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  Build-And-Deploy:
-    runs-on: ubuntu-20.04
+  # Built job
+  build:
+    runs-on: ubuntu-latest
     steps:
-      # Checkout the repository
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.99.0'
+          extended: true
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch_depth: 0
           submodules: recursive
-      - name: Fetch tags
-        shell: bash
-        run: git fetch --tags -f
-      - name: Download Hugo
-        run: wget --retry-connrefused --waitretry=1 --read-timeout=20 https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_Linux-64bit.deb --output-document=hugo.deb
-        env:
-          HUGO_VERSION: "0.73.0"
-      - name: List files
-        run: ls -ahl
-      - name: Install Hugo
-        run: sudo dpkg -i hugo.deb
-      - name: Print Hugo version
-        run: hugo version
-      - name: Remove Hugo Installer
-        run: rm hugo.deb
-      - name: Build Hugo website
-        run: hugo
-      - name: Debug
-        run: echo $GITHUB_REPOSITORY
-      - name: Deploy official website
-        if: ${{ env.GITHUB_REPOSITORY }} == 'pslab-unibo/web-frontend'
-        uses: JamesIves/github-pages-deploy-action@4.0.0
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v1
+      - name: Build with Hugo
+        run: |
+          hugo \
+            --minify \
+            --baseURL ${{ steps.pages.outputs.base_url }}
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
-          git-config-name: Danilo Pianini
-          git-config-email: danilo.pianini@unibo.it
-          repository-name: pslab-unibo/pslab-unibo.github.io
-          branch: master
-          folder: public
-      - name: Deploy staging
-        uses: JamesIves/github-pages-deploy-action@4.0.0
-        with:
-          git-config-name: Danilo Pianini
-          git-config-email: danilo.pianini@unibo.it
-          branch: gh-pages
-          folder: public
+          path: ./public
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
